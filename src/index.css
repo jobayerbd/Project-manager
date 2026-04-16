@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+
+  --color-brand-blue: #2563EB;
+  --color-brand-ink: #1E293B;
+  --color-brand-muted: #64748B;
+  --color-brand-bg: #F8FAFC;
+  --color-brand-line: #E2E8F0;
+  --color-brand-surface: #FFFFFF;
+  
+  --color-accent-blue-light: #EFF6FF;
+  --color-accent-blue-badge: #DBEAFE;
+  --color-accent-blue-dark: #1E40AF;
+  --color-accent-amber: #F59E0B;
+  --color-accent-amber-light: #FFFBEB;
+  --color-accent-amber-border: #FEF3C7;
+  --color-accent-amber-text: #92400E;
+}
+
+@layer base {
+  body {
+    @apply bg-brand-bg text-brand-ink font-sans antialiased;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-brand-surface border border-brand-line rounded-xl shadow-sm;
+  }
+
+  .btn-primary {
+    @apply bg-brand-blue text-white px-4 py-2 rounded-lg font-medium transition-all hover:opacity-90 active:scale-95 disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-brand-muted border border-brand-line px-4 py-2 rounded-lg font-medium transition-all hover:bg-brand-bg hover:text-brand-ink active:scale-95 disabled:opacity-50;
+  }
+
+  .btn-amber {
+    @apply bg-accent-amber text-white px-4 py-2 rounded-lg font-medium transition-all hover:opacity-90 active:scale-95;
+  }
+
+  .input-field {
+    @apply w-full bg-white border border-brand-line rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-brand-blue/10 focus:border-brand-blue transition-all text-sm;
+  }
+
+  .role-badge {
+    @apply bg-accent-blue-badge text-accent-blue-dark px-2 py-1 rounded text-[11px] font-bold uppercase tracking-wider;
+  }
+
+  .common-box {
+    @apply bg-accent-amber-light border border-accent-amber-border p-4 rounded-lg;
+  }
+}
