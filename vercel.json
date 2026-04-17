@@ -1,7 +1,7 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/server.ts" },
+    { "source": "/api/create-user", "destination": "/api/create-user.ts" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

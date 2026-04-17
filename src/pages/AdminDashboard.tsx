@@ -209,8 +209,14 @@ export default function AdminDashboard({ view, onViewChange }: { view: ViewType;
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newUser)
       });
-      const result = await response.json();
       
+      const contentType = response.headers.get("content-type");
+      if (!response.ok || !contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        throw new Error(`Server Error (${response.status}): ${text.substring(0, 100)}`);
+      }
+
+      const result = await response.json();
       if (!result.success) throw new Error(result.error);
       
       setShowAddPersonnel(false);
@@ -219,7 +225,7 @@ export default function AdminDashboard({ view, onViewChange }: { view: ViewType;
       alert('Account created successfully! No email verification needed.');
     } catch (err: any) {
       console.error(err);
-      alert('Error: ' + err.message);
+      alert('Failed to add personnel: ' + err.message);
     } finally {
       setLoading(false);
     }

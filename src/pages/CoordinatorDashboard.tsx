@@ -294,8 +294,14 @@ export default function CoordinatorDashboard({ view, onViewChange }: { view: Vie
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newUser)
       });
-      const result = await response.json();
       
+      const contentType = response.headers.get("content-type");
+      if (!response.ok || !contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        throw new Error(`Server Error (${response.status}): ${text.substring(0, 100)}`);
+      }
+
+      const result = await response.json();
       if (!result.success) throw new Error(result.error);
       
       setShowAddPersonnel(false);
@@ -304,7 +310,7 @@ export default function CoordinatorDashboard({ view, onViewChange }: { view: Vie
       alert('Personnel added successfully! They can now log in.');
     } catch (err: any) {
       console.error(err);
-      alert('Error: ' + err.message);
+      alert('Failed to add personnel: ' + err.message);
     } finally {
       setLoading(false);
     }
