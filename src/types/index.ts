@@ -1,4 +1,4 @@
-export type UserRole = 'ADMIN' | 'PROJECT_COORDINATOR' | 'SITE_COORDINATOR';
+export type UserRole = 'ADMIN' | 'COORDINATOR' | 'SITE_COORDINATOR';
 
 export interface Profile {
   id: string;
@@ -12,6 +12,7 @@ export interface Project {
   id: string;
   name: string;
   description: string;
+  deadline: string | null;
   created_by: string;
   created_at: string;
 }

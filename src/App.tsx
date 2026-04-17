@@ -1,13 +1,15 @@
+import React, { useState } from 'react';
 import { useAuth } from './hooks/useAuth';
 import AuthPage from './pages/Auth';
 import Dashboard from './pages/Dashboard';
-import { Sidebar } from './components/layout/Sidebar';
+import { Sidebar, ViewType } from './components/layout/Sidebar';
 import { Loader2, ShieldAlert } from 'lucide-react';
 import { isConfigured } from './lib/supabase';
 import { Card } from './components/ui/Card';
 
 export default function App() {
   const { user, profile, loading } = useAuth();
+  const [activeView, setActiveView] = useState<ViewType>('DASHBOARD');
 
   if (!isConfigured) {
     return (
@@ -50,10 +52,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-brand-bg flex">
-      <Sidebar />
+      <Sidebar activeView={activeView} onNavigate={setActiveView} />
       <main className="flex-1 ml-60 p-8 min-h-screen">
         <div className="max-w-[1024px] mx-auto">
-          <Dashboard />
+          <Dashboard view={activeView} onViewChange={setActiveView} />
         </div>
       </main>
     </div>

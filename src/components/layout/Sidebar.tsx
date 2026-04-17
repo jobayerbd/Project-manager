@@ -5,7 +5,9 @@ import { Button } from '../ui/Button';
 import { LogOut, Home, Briefcase, Users, FileText, Receipt, Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
-export function Sidebar() {
+export type ViewType = 'DASHBOARD' | 'PROJECTS' | 'ADMINISTRATION' | 'REPORTS' | 'COMMON_POOL';
+
+export function Sidebar({ activeView, onNavigate }: { activeView: ViewType; onNavigate: (view: ViewType) => void }) {
   const { profile } = useAuth();
   const role = profile?.role;
 
@@ -18,24 +20,54 @@ export function Sidebar() {
       </div>
 
       <div className="flex-1 flex flex-col gap-1">
-        <NavItem icon={<Home className="w-4 h-4" />} label="Dashboard" active />
+        <NavItem 
+          icon={<Home className="w-4 h-4" />} 
+          label="Dashboard" 
+          active={activeView === 'DASHBOARD'} 
+          onClick={() => onNavigate('DASHBOARD')}
+        />
         
-        {role === 'ADMIN' && (
-          <NavItem icon={<Users className="w-4 h-4" />} label="Administration" />
+        {(role === 'ADMIN' || role === 'COORDINATOR') && (
+          <NavItem 
+            icon={<Users className="w-4 h-4" />} 
+            label="Personnel" 
+            active={activeView === 'ADMINISTRATION'}
+            onClick={() => onNavigate('ADMINISTRATION')}
+          />
         )}
 
-        {(role === 'ADMIN' || role === 'PROJECT_COORDINATOR') && (
+        {(role === 'ADMIN' || role === 'COORDINATOR') && (
           <>
-            <NavItem icon={<Briefcase className="w-4 h-4" />} label="All Projects" />
-            <NavItem icon={<Receipt className="w-4 h-4" />} label="Common Pool" />
+            <NavItem 
+              icon={<Briefcase className="w-4 h-4" />} 
+              label="All Projects" 
+              active={activeView === 'PROJECTS'}
+              onClick={() => onNavigate('PROJECTS')}
+            />
+            <NavItem 
+              icon={<Receipt className="w-4 h-4" />} 
+              label="Common Pool" 
+              active={activeView === 'COMMON_POOL'}
+              onClick={() => onNavigate('COMMON_POOL')}
+            />
           </>
         )}
 
-        {role === 'SITE_COORDINATOR' && (
-          <NavItem icon={<Briefcase className="w-4 h-4" />} label="My Sites" />
+        {(role === 'SITE_COORDINATOR' || role === 'SITE_MANAGER') && (
+          <NavItem 
+            icon={<Briefcase className="w-4 h-4" />} 
+            label="My Sites" 
+            active={activeView === 'PROJECTS'}
+            onClick={() => onNavigate('PROJECTS')}
+          />
         )}
         
-        <NavItem icon={<FileText className="w-4 h-4" />} label="Reports" />
+        <NavItem 
+          icon={<FileText className="w-4 h-4" />} 
+          label="Reports" 
+          active={activeView === 'REPORTS'}
+          onClick={() => onNavigate('REPORTS')}
+        />
       </div>
 
       <div className="mt-auto space-y-4">
@@ -46,7 +78,9 @@ export function Sidebar() {
               </div>
               <div className="flex flex-col overflow-hidden">
                 <span className="text-[13px] font-bold truncate text-brand-ink">{profile?.full_name}</span>
-                <span className="text-[10px] uppercase font-bold text-brand-muted tracking-tight">{profile?.role.replace('_', ' ')}</span>
+                <span className="text-[10px] uppercase font-bold text-brand-muted tracking-tight">
+                  {role === 'SITE_COORDINATOR' || role === 'SITE_MANAGER' ? 'SITE MANAGER' : role?.replace('_', ' ')}
+                </span>
               </div>
            </div>
            <Button variant="secondary" className="w-full justify-start gap-3 border-0 px-2 h-10 text-xs hover:bg-red-50 hover:text-red-600 transition-colors" onClick={handleLogout}>
@@ -59,12 +93,15 @@ export function Sidebar() {
   );
 }
 
-function NavItem({ icon, label, active }: { icon: React.ReactNode; label: string; active?: boolean }) {
+function NavItem({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active?: boolean; onClick: () => void }) {
   return (
-    <button className={cn(
-      "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all w-full text-left cursor-pointer",
-      active ? "bg-accent-blue-light text-brand-blue font-semibold" : "text-brand-muted hover:text-brand-ink hover:bg-brand-bg"
-    )}>
+    <button 
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all w-full text-left cursor-pointer",
+        active ? "bg-accent-blue-light text-brand-blue font-semibold shadow-sm" : "text-brand-muted hover:text-brand-ink hover:bg-brand-bg"
+      )}
+    >
       {icon}
       {label}
     </button>

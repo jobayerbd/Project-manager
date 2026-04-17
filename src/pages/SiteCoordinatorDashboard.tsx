@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
-import { Card } from '../components/ui/Card';
+import { Card, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Transaction, Project } from '../types';
 import { formatCurrency, cn } from '../lib/utils';
-import { Plus, Wallet, Receipt, AlertCircle, ArrowDownLeft } from 'lucide-react';
+import { Plus, Wallet, Receipt, AlertCircle, ArrowDownLeft, Briefcase, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
+import { ViewType } from '../components/layout/Sidebar';
 
-export default function SiteCoordinatorDashboard() {
+export default function SiteCoordinatorDashboard({ view, onViewChange }: { view: ViewType; onViewChange: (view: ViewType) => void }) {
   const { profile } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -43,14 +44,21 @@ export default function SiteCoordinatorDashboard() {
   async function fetchData() {
     if (!profile) return;
     try {
-      const { data: assignments } = await supabase
+      const { data: assignments, error: assignmentsError } = await supabase
         .from('project_assignments')
         .select('projects(*)')
         .eq('user_id', profile.id);
       
+      if (assignmentsError) {
+        if (assignmentsError.code === 'PGRST204') {
+          console.error('Database Schema Mismatch: Missing "deadline" column in "projects" table or relation issue.');
+        }
+        throw assignmentsError;
+      }
+      
       setProjects(assignments?.map(a => a.projects) || []);
 
-      const { data: transData } = await supabase
+      const { data: transData, error: transError } = await supabase
         .from('transactions')
         .select(`
           *,
@@ -60,6 +68,13 @@ export default function SiteCoordinatorDashboard() {
         `)
         .or(`from_id.eq.${profile.id},to_id.eq.${profile.id}`)
         .order('created_at', { ascending: false });
+      
+      if (transError) {
+        if (transError.code === 'PGRST204') {
+          console.error('Database Schema Mismatch: Missing columns in "transactions" table.');
+        }
+        throw transError;
+      }
       
       const trans = transData || [];
       setTransactions(trans);
@@ -104,6 +119,108 @@ export default function SiteCoordinatorDashboard() {
 
   if (loading && !profile) return null;
 
+  // Render Projects View
+  if (view === 'PROJECTS') {
+    return (
+      <div className="max-w-[1024px]">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-brand-ink">My Allocated Sites</h1>
+          <p className="text-brand-muted text-sm mt-0.5">Projects where you are assigned as a Site Coordinator</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {projects.map(project => (
+            <Card key={project.id} className="hover:border-brand-blue transition-colors group">
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-10 h-10 rounded-lg bg-brand-bg flex items-center justify-center text-brand-blue shrink-0">
+                  <Briefcase className="w-5 h-5" />
+                </div>
+                <div className={cn(
+                  "px-2 py-0.5 rounded text-[10px] font-bold uppercase",
+                  project.deadline ? 'bg-blue-50 text-brand-blue border border-blue-100' : 'bg-slate-50 text-slate-400 border border-brand-line'
+                )}>
+                  {project.deadline ? `Due: ${format(new Date(project.deadline), 'MMM dd, yyyy')}` : 'No Deadline'}
+                </div>
+              </div>
+              <h3 className="text-lg font-bold text-brand-ink mb-2 group-hover:text-brand-blue transition-colors">{project.name}</h3>
+              <p className="text-sm text-brand-muted line-clamp-2 mb-6 min-h-[40px]">{project.description}</p>
+              
+              <div className="pt-4 border-t border-brand-line flex justify-between items-center text-xs font-bold uppercase tracking-wider text-brand-muted">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5" />
+                  Assigned {format(new Date(project.created_at), 'MMM dd, yyyy')}
+                </div>
+                <button onClick={() => onViewChange('DASHBOARD')} className="text-brand-blue hover:underline">Site Log</button>
+              </div>
+            </Card>
+          ))}
+          {projects.length === 0 && (
+            <div className="col-span-full py-20 text-center text-brand-muted italic">
+              No project sites assigned to your registry yet.
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Render Reports View
+  if (view === 'REPORTS') {
+    const projectStats = projects.map(p => {
+       const projectTrans = transactions.filter(t => t.project_id === p.id);
+       const totalSpent = projectTrans.filter(t => t.type === 'EXPENSE').reduce((acc, t) => acc + Number(t.amount), 0);
+       return { ...p, totalSpent };
+    });
+
+    return (
+       <div className="max-w-[1024px]">
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-brand-ink">My Site Reports</h1>
+            <p className="text-brand-muted text-sm mt-0.5">detailed expenditure per assigned site</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+             <Card>
+                <CardTitle>Project Wise Spend</CardTitle>
+                <div className="space-y-4">
+                   {projectStats.map(stat => (
+                      <div key={stat.id} className="p-3 border border-brand-line rounded-lg bg-brand-bg/30">
+                         <div className="flex justify-between items-center mb-1">
+                            <span className="text-sm font-bold text-brand-ink">{stat.name}</span>
+                            <span className="text-sm font-bold text-red-500">-{formatCurrency(stat.totalSpent)}</span>
+                         </div>
+                         <p className="text-[10px] text-brand-muted font-bold uppercase tracking-tight">Assigned on {format(new Date(stat.created_at), 'MMM dd, yyyy')}</p>
+                      </div>
+                   ))}
+                   {projects.length === 0 && <p className="text-center py-10 text-brand-muted italic">No assigned sites.</p>}
+                </div>
+             </Card>
+
+             <Card>
+                <CardTitle>Recent Transactions</CardTitle>
+                <div className="space-y-4">
+                   {transactions.slice(0, 10).map(t => (
+                      <div key={t.id} className="flex justify-between items-center">
+                         <div>
+                            <p className="text-xs font-bold text-brand-ink">{t.description}</p>
+                            <p className="text-[9px] text-brand-muted uppercase font-bold">{format(new Date(t.created_at), 'MMM dd')}</p>
+                         </div>
+                         <span className={cn(
+                           "text-xs font-bold",
+                           t.type === 'EXPENSE' ? 'text-red-500' : 'text-green-600'
+                         )}>
+                            {t.type === 'EXPENSE' ? '-' : '+'}{formatCurrency(t.amount)}
+                         </span>
+                      </div>
+                   ))}
+                   {transactions.length === 0 && <p className="text-center py-10 text-brand-muted italic">No activity yet.</p>}
+                </div>
+             </Card>
+          </div>
+       </div>
+    );
+  }
+
   return (
     <div className="max-w-[1024px]">
       <div className="flex justify-between items-center mb-8">
@@ -114,7 +231,7 @@ export default function SiteCoordinatorDashboard() {
         <div className="flex items-center gap-3">
           <div className="text-right hidden sm:block">
             <div className="text-sm font-semibold text-brand-ink">{profile?.full_name}</div>
-            <div className="role-badge">SITE COORDINATOR</div>
+            <div className="role-badge">SITE MANAGER</div>
           </div>
           <div className="w-10 h-10 rounded-full bg-brand-line flex items-center justify-center font-bold text-brand-muted">
              {profile?.full_name?.[0] || 'U'}
@@ -131,7 +248,7 @@ export default function SiteCoordinatorDashboard() {
       {balance < 0 && (
          <div className="bg-red-50 border border-red-100 p-4 rounded-xl flex items-center gap-3 text-red-700 mb-8 border-l-4">
            <AlertCircle className="w-5 h-5 flex-shrink-0" />
-           <p className="text-sm font-semibold">Negative balance detected. Please reconcile with your Project Coordinator.</p>
+           <p className="text-sm font-semibold">Negative balance detected. Please reconcile with your Coordinator.</p>
          </div>
       )}
 

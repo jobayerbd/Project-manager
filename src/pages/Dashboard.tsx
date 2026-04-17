@@ -1,21 +1,34 @@
 import { useAuth } from '../hooks/useAuth';
 import AdminDashboard from './AdminDashboard';
-import PCDashboard from './ProjectCoordinatorDashboard';
+import CoordinatorDashboard from './CoordinatorDashboard';
 import SCDashboard from './SiteCoordinatorDashboard';
+import { ViewType } from '../components/layout/Sidebar';
 
-export default function Dashboard() {
+export default function Dashboard({ view, onViewChange }: { view: ViewType; onViewChange: (view: ViewType) => void }) {
   const { profile } = useAuth();
 
   if (!profile) return null;
 
-  switch (profile.role) {
+  const role = profile.role?.toUpperCase();
+
+  // Global override for Admin functionality
+  if (view === 'ADMINISTRATION' && role === 'ADMIN') {
+    return <AdminDashboard view={view} onViewChange={onViewChange} />;
+  }
+
+  switch (role) {
     case 'ADMIN':
-      return <AdminDashboard />;
-    case 'PROJECT_COORDINATOR':
-      return <PCDashboard />;
+      return <AdminDashboard view={view} onViewChange={onViewChange} />;
+    case 'COORDINATOR':
+      return <CoordinatorDashboard view={view} onViewChange={onViewChange} />;
     case 'SITE_COORDINATOR':
-      return <SCDashboard />;
+    case 'SITE_MANAGER':
+      return <SCDashboard view={view} onViewChange={onViewChange} />;
     default:
-      return <div>Invalid role</div>;
+      // Fallback for old role names
+      if (role === 'PROJECT_COORDINATOR') {
+        return <CoordinatorDashboard view={view} onViewChange={onViewChange} />;
+      }
+      return <div>Invalid role: {profile.role}</div>;
   }
 }

@@ -1,10 +1,11 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
 
-export interface CardProps {
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   className?: string;
-  onClick?: (e: any) => void;
+  onClick?: any;
+  key?: any;
 }
 
 export function Card({ children, className, onClick, ...props }: CardProps) {
