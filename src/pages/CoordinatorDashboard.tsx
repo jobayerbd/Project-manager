@@ -305,7 +305,7 @@ export default function CoordinatorDashboard({ view, onViewChange }: { view: Vie
       if (!result.success) throw new Error(result.error);
       
       setShowAddPersonnel(false);
-      setNewUser({ email: '', password: '', full_name: '', role: 'SITE_MANAGER' });
+      setNewUser({ email: '', password: '', full_name: '', role: 'SITE_COORDINATOR' });
       fetchData();
       alert('Personnel added successfully! They can now log in.');
     } catch (err: any) {

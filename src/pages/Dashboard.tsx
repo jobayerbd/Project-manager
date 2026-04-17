@@ -28,7 +28,7 @@ export default function Dashboard({ view, onViewChange }: { view: ViewType; onVi
       if (role === 'PROJECT_COORDINATOR' || role === 'COORDINATOR') {
         return <CoordinatorDashboard view={view} onViewChange={onViewChange} />;
       }
-      if (role === 'SITE_MANAGER') {
+      if (role === 'SITE_MANAGER' || role === 'SITE_COORDINATOR') {
         return <SCDashboard view={view} onViewChange={onViewChange} />;
       }
       return <div>Invalid role: {profile.role}</div>;

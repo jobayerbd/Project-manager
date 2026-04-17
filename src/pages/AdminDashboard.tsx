@@ -320,34 +320,40 @@ export default function AdminDashboard({ view, onViewChange }: { view: ViewType;
               <thead>
                 <tr className="border-b border-brand-line bg-brand-bg/30">
                   <th className="text-[10px] font-bold text-brand-muted uppercase tracking-wider py-4 px-6">User / Bio</th>
+                  <th className="text-[10px] font-bold text-brand-muted uppercase tracking-wider py-4 px-6 text-center">Funds</th>
                   <th className="text-[10px] font-bold text-brand-muted uppercase tracking-wider py-4 px-6">System Access</th>
                   <th className="text-[10px] font-bold text-brand-muted uppercase tracking-wider py-4 px-6 text-right">Update Permissions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-line">
-                {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-brand-bg transition-colors group">
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-white border border-brand-line flex items-center justify-center font-bold text-xs text-brand-muted shrink-0">
-                          {u.full_name?.[0] || '?'}
+                {users.map((u) => {
+                  const userBalance = getCoordinatorBalance(u.id);
+                  return (
+                    <tr key={u.id} className="hover:bg-brand-bg transition-colors group">
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-white border border-brand-line flex items-center justify-center font-bold text-xs text-brand-muted shrink-0">
+                            {u.full_name?.[0] || '?'}
+                          </div>
+                          <div className="overflow-hidden">
+                            <p className="text-sm font-semibold text-brand-ink truncate">{u.full_name}</p>
+                            <p className="text-[10px] text-brand-muted uppercase font-bold tracking-tight">{u.username}</p>
+                          </div>
                         </div>
-                        <div className="overflow-hidden">
-                          <p className="text-sm font-semibold text-brand-ink truncate">{u.full_name}</p>
-                          <p className="text-[10px] text-brand-muted uppercase font-bold tracking-tight">{u.username}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className={cn(
-                        "px-2 py-0.5 rounded text-[9px] font-bold uppercase",
-                        u.role?.toUpperCase() === 'ADMIN' ? 'bg-purple-100 text-purple-700' :
-                        (u.role?.toUpperCase() === 'COORDINATOR' || u.role?.toUpperCase() === 'PROJECT_COORDINATOR') ? 'bg-blue-100 text-blue-700' :
-                        'bg-slate-50 text-slate-500 border border-brand-line'
-                      )}>
-                        {(u.role?.toUpperCase() === 'COORDINATOR') ? 'COORDINATOR' : (u.role || '').replace('_', ' ')}
-                      </span>
-                    </td>
+                      </td>
+                      <td className="py-4 px-6 text-center font-bold text-xs text-brand-ink">
+                        {u.role === 'ADMIN' ? '∞' : formatCurrency(userBalance)}
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className={cn(
+                          "px-2 py-0.5 rounded text-[9px] font-bold uppercase",
+                          u.role?.toUpperCase() === 'ADMIN' ? 'bg-purple-100 text-purple-700' :
+                          (u.role?.toUpperCase() === 'COORDINATOR' || u.role?.toUpperCase() === 'PROJECT_COORDINATOR') ? 'bg-blue-100 text-blue-700' :
+                          'bg-slate-50 text-slate-500 border border-brand-line'
+                        )}>
+                          {(u.role?.toUpperCase() === 'COORDINATOR') ? 'COORDINATOR' : (u.role || '').replace('_', ' ')}
+                        </span>
+                      </td>
                     <td className="py-4 px-6 text-right">
                       <select
                         className="text-[10px] bg-white border border-brand-line rounded-md px-2 py-1 font-bold text-brand-blue hover:border-brand-blue outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
@@ -361,7 +367,8 @@ export default function AdminDashboard({ view, onViewChange }: { view: ViewType;
                       </select>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -745,7 +752,7 @@ export default function AdminDashboard({ view, onViewChange }: { view: ViewType;
                         >
                           {isActualAdmin && <option value="ADMIN">ADMIN</option>}
                           <option value="COORDINATOR">COORDINATOR</option>
-                          <option value="SITE_MANAGER">SITE MANAGER</option>
+                          <option value="SITE_COORDINATOR">SITE COORDINATOR</option>
                         </select>
                       </td>
                     </tr>
