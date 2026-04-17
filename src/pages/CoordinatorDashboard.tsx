@@ -36,7 +36,7 @@ export default function CoordinatorDashboard({ view, onViewChange }: { view: Vie
   const [newExpense, setNewExpense] = useState({ amount: '', description: '', isCommon: false, projectId: '' });
   const [newTransfer, setNewTransfer] = useState({ amount: '', toId: '', description: '' });
   const [newAssignment, setNewAssignment] = useState({ projectId: '', userId: '' });
-  const [newUser, setNewUser] = useState({ email: '', password: '', full_name: '', role: 'SITE_MANAGER' });
+  const [newUser, setNewUser] = useState({ email: '', password: '', full_name: '', role: 'SITE_COORDINATOR' });
 
   // Stats
   const [balance, setBalance] = useState(0);
@@ -93,7 +93,7 @@ export default function CoordinatorDashboard({ view, onViewChange }: { view: Vie
       
       const scData = (profilesData || []).filter(u => {
         const r = u.role?.toUpperCase();
-        return r === 'SITE_MANAGER' || r === 'COORDINATOR';
+        return r === 'SITE_COORDINATOR' || r === 'COORDINATOR';
       });
       setScs(scData);
 
@@ -366,7 +366,7 @@ export default function CoordinatorDashboard({ view, onViewChange }: { view: Vie
                     onChange={e => setNewUser({...newUser, role: e.target.value})}
                     required
                   >
-                    <option value="SITE_MANAGER">SITE MANAGER</option>
+                    <option value="SITE_COORDINATOR">SITE COORDINATOR</option>
                     <option value="COORDINATOR">COORDINATOR</option>
                   </select>
                 </div>
@@ -441,7 +441,7 @@ export default function CoordinatorDashboard({ view, onViewChange }: { view: Vie
            <ul className="text-xs text-brand-muted space-y-2 list-disc list-inside">
               <li>New personnel must be registered via the central Auth system.</li>
               <li>Once registered, they will appear in the Admin's Global Registry.</li>
-              <li>The System Admin will then assign them as a <b>Coordinator</b> or <b>Site Manager</b>.</li>
+              <li>The System Admin will then assign them as a <b>Coordinator</b> or <b>Site Coordinator</b>.</li>
            </ul>
         </div>
       </div>

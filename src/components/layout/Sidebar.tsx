@@ -79,7 +79,7 @@ export function Sidebar({ activeView, onNavigate }: { activeView: ViewType; onNa
               <div className="flex flex-col overflow-hidden">
                 <span className="text-[13px] font-bold truncate text-brand-ink">{profile?.full_name}</span>
                 <span className="text-[10px] uppercase font-bold text-brand-muted tracking-tight">
-                  {role === 'SITE_COORDINATOR' || role === 'SITE_MANAGER' ? 'SITE MANAGER' : role?.replace('_', ' ')}
+                  {role?.toUpperCase() === 'SITE_COORDINATOR' || role?.toUpperCase() === 'SITE_MANAGER' ? 'SITE MANAGER' : role?.replace('_', ' ')}
                 </span>
               </div>
            </div>

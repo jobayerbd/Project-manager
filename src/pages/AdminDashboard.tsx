@@ -66,7 +66,7 @@ export default function AdminDashboard({ view, onViewChange }: { view: ViewType;
       const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
       // If coordinator, filter to see only site managers and other coordinators (usually they just see site managers)
       if (!isActualAdmin) {
-        setUsers((data || []).filter(u => u.role?.toUpperCase() === 'SITE_MANAGER' || u.id === profile?.id));
+        setUsers((data || []).filter(u => u.role?.toUpperCase() === 'SITE_COORDINATOR' || u.id === profile?.id));
       } else {
         setUsers(data || []);
       }
@@ -282,7 +282,7 @@ export default function AdminDashboard({ view, onViewChange }: { view: ViewType;
                     required
                   >
                     <option value="COORDINATOR">COORDINATOR</option>
-                    <option value="SITE_MANAGER">SITE MANAGER</option>
+                    <option value="SITE_COORDINATOR">SITE COORDINATOR</option>
                     {isActualAdmin && <option value="ADMIN">ADMIN</option>}
                   </select>
                 </div>
@@ -357,7 +357,7 @@ export default function AdminDashboard({ view, onViewChange }: { view: ViewType;
                       >
                         {isActualAdmin && <option value="ADMIN">ADMIN</option>}
                         <option value="COORDINATOR">COORDINATOR</option>
-                        <option value="SITE_MANAGER">SITE MANAGER</option>
+                        <option value="SITE_COORDINATOR">SITE COORDINATOR</option>
                       </select>
                     </td>
                   </tr>

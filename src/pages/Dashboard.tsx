@@ -22,12 +22,14 @@ export default function Dashboard({ view, onViewChange }: { view: ViewType; onVi
     case 'COORDINATOR':
       return <CoordinatorDashboard view={view} onViewChange={onViewChange} />;
     case 'SITE_COORDINATOR':
-    case 'SITE_MANAGER':
       return <SCDashboard view={view} onViewChange={onViewChange} />;
     default:
       // Fallback for old role names
-      if (role === 'PROJECT_COORDINATOR') {
+      if (role === 'PROJECT_COORDINATOR' || role === 'COORDINATOR') {
         return <CoordinatorDashboard view={view} onViewChange={onViewChange} />;
+      }
+      if (role === 'SITE_MANAGER') {
+        return <SCDashboard view={view} onViewChange={onViewChange} />;
       }
       return <div>Invalid role: {profile.role}</div>;
   }
